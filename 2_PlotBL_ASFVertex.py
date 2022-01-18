@@ -26,9 +26,9 @@ class InSAR_Baseline_ASFVertex( InSAR_Baseline ):
     def __init__(self, FOLDER):
         self.FOLDER = FOLDER
         FILE = Path(FOLDER).joinpath('asf-sbas-pairs.csv')
-        df = pd.read_csv( FILE , skipinitialspace=True )
+        df_csv = pd.read_csv( FILE , skipinitialspace=True )
         ifgs = list() ; refs = list()
-        for i,row in df.iterrows():
+        for i,row in df_csv.iterrows():
             #import pdb; pdb.set_trace()
             dtms = row.Reference.split('_')[5] 
             dtsl = row.Secondary.split('_')[5]
@@ -54,12 +54,8 @@ class InSAR_Baseline_ASFVertex( InSAR_Baseline ):
         ###################################################
         self.df_ifg = df_ifg
         self.df_ref = df_ref
+        self.df_csv = df_csv
         super().__init__()
-
-    def SentinelDate( self, PRODUCT ):
-        dttm = PRODUCT.split('_')[5]
-        dtiso = dttm.split('T')[0]
-        return dt.datetime(int(dtiso[0:4]),int( dtiso[4:6]),int(dtiso[6:]))
 
 ############################################################
 ############################################################
@@ -70,22 +66,26 @@ if __name__=="__main__":
         bl = InSAR_Baseline_ASFVertex( FOLDER )
     else:
         print(PROG)
-        print('Usage: PlotBL_InSAR <DIR_OF_IFGs')
+        print('Usage: PlotBL_InSAR DIR_OF_IFGs')
         exit(-1)
-
     ############################################################
     DIR_NAME = Path(FOLDER).resolve().stem
     df_ref,df_ifg = bl.CalcBaseLine()
-    #import pdb; pdb.set_trace()
     print('Plotting baseline network and histogram ...')
     bl.PlotBaseline( )
     bl.PlotHisto()
-
     #############################
-    if 1:
-        print('Partition IFGs for Boat/LookMee/Latae')
+    if 0:
+        print('@@@@@@@@@ P R O C E S S I N G   S P E C I A L   F E A T U R E @@@@@@@@@')
+        print('Partition IFGs for Boat/LookMee/PSN')
         for YEAR,TEAM in [(2019,'BOAT'),(2020,'LKMEE') ,(2021,'PSN')]:
-            df_part =  df_ifg[df_ifg.dt_master.dt.year==YEAR]
-            print( f'Year {YEAR}   Team : {TEAM}    Number of scene : {len(df_part)} ' )
+            df_ifg_part =  df_ifg[df_ifg.dt_master.dt.year==YEAR]
+            df_csv_part =  bl.df_csv.loc[df_ifg_part.index]
+            print( f'Year {YEAR}   Team : {TEAM}    Number of scene : {len(df_csv_part)} ' )
+            ORB = Path(FOLDER).stem[:3]
+            out_csv = Path(FOLDER, f'sbas-pair-{ORB}-{YEAR}.csv' )
+            df_csv_part.to_csv( out_csv, index=False )
+
+#import pdb ; pdb.set_trace()
 
 

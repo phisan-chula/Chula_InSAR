@@ -21,7 +21,6 @@ class InSAR_Baseline:
     '''
     self.df_ref.info()
      0   Granule   29 non-null     object
-     1   NAME4     29 non-null     object
      2   dtAcq     29 non-null     datetime64[ns]
      3   Btemp0_d  29 non-null     int64
      4   Bperp0_m  29 non-null     float64
@@ -64,7 +63,7 @@ class InSAR_Baseline:
         df_ifg['Bperp_m'] = BLs
         return df_ref, df_ifg
 
-    def PlotBaseline( self, PROD_LABEL=True ):
+    def PlotBaseline( self ):
         def toMMDD(dt ):
             return '{:02d}/{:02d}'.format( dt.month, dt.day )
         self.df_ref['MMDD'] = self.df_ref['dtAcq'].apply( toMMDD )
@@ -74,15 +73,15 @@ class InSAR_Baseline:
         ax2.set_xlim( self.df_ref.iloc[-1].Btemp0_d, self.df_ref.iloc[0].Btemp0_d)
         ax2.set_xlabel('Days from Reference')
         for i, row in self.df_ref.iterrows():
-            ax.annotate(row.MMDD,( row.dtAcq, row.Bperp0_m ),
-                family='sans-serif', fontsize=12, color='darkslategrey')
+            ax.annotate(f'{row.MMDD}<{row.PROD}>',( row.dtAcq, row.Bperp0_m ),
+                family='sans-serif', fontsize=12, color='darkslategrey', ha='center')
         for i,row in self.df_ifg.iterrows():
             ax.plot( [row.dt_master, row.dt_slave] , 
                      [row.pnt_master[1], row.pnt_slave[1]]  )
-            dt_mid = row.dt_master + (row.dt_slave-row.dt_master)/2.
-            if PROD_LABEL:
-                ax.text( dt_mid, (row.pnt_master[1]+row.pnt_slave[1])/2,
-                  row.NAME4, alpha=0.7, c='red', ma='center', style='italic') 
+            if 'PROD' in self.df_ifg.columns:
+                mid_dt = row.dt_master + (row.dt_slave-row.dt_master)/2.
+                mid_bl = (row.pnt_master[1]+row.pnt_slave[1] )/2.
+                ax.text( mid_dt,mid_bl, row['PROD'], c='red', alpha=0.5 )
         ax.annotate('Ref.Granule', xy=(self.df_ref.iloc[0].dtAcq,0), xytext=(0,-50),
             textcoords='offset points',arrowprops=dict(facecolor='black', shrink=0.05),)
         self.df_ref.plot.scatter(x='dtAcq',y='Bperp0_m',s=10,c='r',ax=ax)
@@ -91,7 +90,6 @@ class InSAR_Baseline:
         DAYS_LEAD = dt.timedelta( days=20 )
         ax.set_xlim(  self.df_ref.iloc[-1].dtAcq-DAYS_LEAD, 
                       self.df_ref.iloc[ 0].dtAcq+DAYS_LEAD )
-        #import pdb; pdb.set_trace()
         ax.tick_params(axis='x', labelrotation=90)
         ax.set_xlabel('Date')
         plt.suptitle( self.TITLE )
