@@ -69,8 +69,8 @@ OPTS = dict( include_los_displacement=True,
                 looks='20x4', 
                 include_dem=True,  
                 include_wrapped_phase=True,
-                #apply_water_mask=True,
-                #include_displacement_maps=True ,
+                apply_water_mask=True,
+                include_displacement_maps=True ,
                 )
 if 1:
     print('*** Dry run no actual submitting ...***')
