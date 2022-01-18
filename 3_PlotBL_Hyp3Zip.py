@@ -24,13 +24,13 @@ class InSAR_Baseline_Hyp3SDK( InSAR_Baseline ):
         #import pdb; pdb.set_trace()
         self.FOLDER=FOLDER
         df_ifg = pd.DataFrame( FOLDER.glob( '*.txt'), columns=['Hyp3Path'] )
-        df_ifg[['NAME4', 'dt_master','dt_slave', 'scene_master','scene_slave',
+        df_ifg[['PROD', 'dt_master','dt_slave', 'scene_master','scene_slave',
                  'Bperp_m', 'Btemp_d' ] ] = df_ifg.apply( self.ParseIfgProduct , 
                          axis='columns', result_type='expand' )
         ####################################
         grs = list( set( list(df_ifg.scene_master)+list(df_ifg.scene_slave)) )
         df_ref = pd.DataFrame( grs , columns=['Granule'] )
-        df_ref['NAME4'] = df_ref.Granule.str[-4:]
+        df_ref['PROD'] = df_ref.Granule.str[-4:]
         def ParseGranule(row):
             S1,_,_,_,_,dtacq,_,_,_,NAME4 = row.Granule.split('_') 
             return dt.datetime.strptime( dtacq, '%Y%m%dT%H%M%S' )

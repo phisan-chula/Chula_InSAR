@@ -46,7 +46,7 @@ PRINT_LINE()
 if args.down and args.job is not None:
     batch = hyp3.find_jobs( status_code='SUCCEEDED', 
             name=args.job, job_type='INSAR_GAMMA' )
-    import pdb; pdb.set_trace()
-    #batch.download_files()
+    #import pdb; pdb.set_trace()
+    batch.download_files()
 
 PRINT_LINE()

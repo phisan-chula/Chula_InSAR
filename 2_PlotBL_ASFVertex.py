@@ -30,7 +30,6 @@ class InSAR_Baseline_ASFVertex( InSAR_Baseline ):
         ifgs = list() ; refs = list()
         for i,row in df.iterrows():
             #import pdb; pdb.set_trace()
-            name4 = row['Reference'][-4:]+'_'+row['Secondary'][-4:]
             dtms = row.Reference.split('_')[5] 
             dtsl = row.Secondary.split('_')[5]
             dt_ms = dt.datetime.strptime( dtms, '%Y%m%dT%H%M%S' )
@@ -40,15 +39,16 @@ class InSAR_Baseline_ASFVertex( InSAR_Baseline ):
             bperp = bl0_sl-bl0_ms
             btemp = row['Pair Temporal Baseline (days)']
             ifgs.append( [ dt_ms, dt_sl, bperp, btemp, 
-                           row['Reference'], row['Secondary'],name4  ] )
+                           row['Reference'], row['Secondary']  ] )
             refs.append( [ row['Reference'], dt_ms, bl0_ms ] )
             refs.append( [ row['Secondary'], dt_sl, bl0_sl ] )
         df_ifg = pd.DataFrame( ifgs, columns=['dt_master', 'dt_slave',
-            'Bperp_m', 'Btemp_d', 'scene_master', 'scene_slave', 'NAME4'  ] )
+            'Bperp_m', 'Btemp_d', 'scene_master', 'scene_slave' ] )
         ###################################################
         df_ref = pd.DataFrame( refs, columns=['Granule', 'dtAcq', 'Bperp0_m' ] )
         df_ref.sort_values( by='dtAcq', ascending=False, inplace=True, ignore_index=True)
         df_ref.drop_duplicates( inplace=True,ignore_index=True )
+        df_ref['PROD'] = df_ref['Granule'].str[-4:]
         df_ref['Btemp0_d'] = df_ref['dtAcq']-df_ref.iloc[0]['dtAcq']
         df_ref['Btemp0_d'] = df_ref['Btemp0_d'].dt.days
         ###################################################
@@ -76,8 +76,9 @@ if __name__=="__main__":
     ############################################################
     DIR_NAME = Path(FOLDER).resolve().stem
     df_ref,df_ifg = bl.CalcBaseLine()
+    #import pdb; pdb.set_trace()
     print('Plotting baseline network and histogram ...')
-    bl.PlotBaseline()
+    bl.PlotBaseline( )
     bl.PlotHisto()
 
     #############################
@@ -87,5 +88,4 @@ if __name__=="__main__":
             df_part =  df_ifg[df_ifg.dt_master.dt.year==YEAR]
             print( f'Year {YEAR}   Team : {TEAM}    Number of scene : {len(df_part)} ' )
 
-    #import pdb; pdb.set_trace()
 
